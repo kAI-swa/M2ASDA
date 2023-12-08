@@ -4,8 +4,6 @@ Anomaly Detection for scRNA-seq Data through GAN-based Model
 ## Dependencies
 torch==1.13.0
 
-dgl==1.1.1
-
 torchvision==0.14.1
 
 anndata==0.10.3
@@ -19,8 +17,6 @@ scipy==1.9.3
 sklearn==0.0.post2
 
 pandas==1.5.2
-
-squidpy==1.2.2
 
 setuptools==59.5.0
 
