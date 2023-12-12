@@ -17,8 +17,6 @@ scanpy==1.9.6
 
 scipy==1.9.3
 
-sklearn==0.0.post2
-
 pandas==1.5.2
 
 setuptools==59.5.0
