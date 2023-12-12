@@ -78,6 +78,7 @@ class Detect_SC(Detect):
         if isinstance(train, str):
             if os.path.exists(train):
                 train = sc.read_h5ad(train)
+                train = train[train.obs["cell.type"] != "B cells"]  # temp
             else:
                 raise FileNotFoundError("File not found Error")
         else:
@@ -98,8 +99,12 @@ class Detect_SC(Detect):
 
         self.opt_D = optim.Adam(self.D.parameters(), lr=self.learning_rate, betas=(0.5, 0.999))
         self.opt_G = optim.Adam(self.G.parameters(), lr=self.learning_rate, betas=(0.5, 0.999))
-        self.D_scaler = torch.cuda.amp.GradScaler()
-        self.G_scaler = torch.cuda.amp.GradScaler()
+        if torch.cuda.is_available():
+            self.D_scaler = torch.cuda.amp.GradScaler()
+            self.G_scaler = torch.cuda.amp.GradScaler()
+        else:
+            self.D_scaler = torch.cuda.amp.GradScaler(enabled=False)
+            self.G_scaler = torch.cuda.amp.GradScaler(enabled=False)
 
         self.L1 = nn.L1Loss().to(self.device)
         self.L2 = nn.MSELoss().to(self.device)
