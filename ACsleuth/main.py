@@ -69,14 +69,16 @@ if __name__ == "__main__":
     adata.obs['score'] = result['score'].values
     precision_scores = []
     recall_scores = []
-    for threshold in threshold_list:
-        adata.obs[f'Pred_{threshold}_threshold'] = (adata.obs['score'] > threshold).astype('category')
+    with tqdm(total=len(threshold_list), leave=False) as t:
+        for threshold in threshold_list:
+            t.set_description(f"Threhold:{threshold}")
+            adata.obs[f'Pred_{threshold}_threshold'] = (adata.obs['score'] > threshold).astype('category')
 
-        precision_scores.append(precision_score(adata.obs['Pred_{threshold}_threshold'], adata.obs['label']))
+            precision = precision_score(adata.obs['Pred_{threshold}_threshold'], adata.obs['label'])
+            recall = recall_score(adata.obs['Pred_{threshold}_threshold'], adata.obs['label'])
+            t.set_postfix(Precision = precision, Recall = recall)
 
-        recall_scores.append(recall_score(adata.obs['Pred_{threshold}_threshold'], adata.obs['label']))
-    
-    print(f"precision score: {precision_scores}")
-    print(f"recall score: {recall_scores}")
+            precision_scores.append(precision)
+            recall_scores.append(recall)
     
 
