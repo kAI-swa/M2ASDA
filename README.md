@@ -1,10 +1,10 @@
 # scRNA-AnomalyDetection
-Anomaly Detection for scRNA-seq Data through GAN-based Model
+**Anomaly Detection for scRNA-seq Data through GAN-based Model**
 ![image](https://github.com/Kainan-Liu/scRNA-AnomalyDetection/assets/146005327/523a3b3c-d2c0-4982-8be3-160b9effc05e)
 
 
 ## Notice
-This repo is forked from CatchXu(https://github.com/Catchxu/ACsleuth) and He is the main author
+**This repo is forked from CatchXu(https://github.com/Catchxu/ACsleuth) and He is the main author**
 
 ## Dependencies
 torch==1.13.0
