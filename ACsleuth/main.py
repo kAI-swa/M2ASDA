@@ -24,6 +24,7 @@ def parse_args():
     parser.add_argument("--log_interval", type=int, default=100)
     parser.add_argument("--random_state", type=int, default=42)
     parser.add_argument("--weight", default=None)
+    parser.add_argument("--anomaly_celltype", type="str", help="given the anomaly cell type for training if you don't have anomaly datasets")
 
     args = parser.parse_args()
 
@@ -57,7 +58,8 @@ if __name__ == "__main__":
         'verbose': args.verbose,
         'log_interval': args.log_interval,
         'random_state': args.random_state,
-        'weight': args.weight
+        'weight': args.weight, 
+        "anomaly_celltype": args.anomaly_celltype
     }
 
     model = Detect_SC(**parameters)
@@ -67,6 +69,7 @@ if __name__ == "__main__":
     threshold_list = [0.1, 0.2, 0.3, 0.4, 0.5]
     adata = sc.read_h5ad(args.test)
     adata.obs['score'] = result['score'].values
+    adata.obs['label'] = [1 if i == args.anomaly_celltype else 0 for i in adata.obs['cell.type']]
     precision_scores = []
     recall_scores = []
     with tqdm(total=len(threshold_list), leave=False) as t:
