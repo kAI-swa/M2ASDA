@@ -9,7 +9,7 @@ import numpy as np
 import anndata as ad
 from typing import Literal, Union, List
 
-from Net import SCNetAE, SRTNetAE, ResNetAE
+from Net import SCNetAE
 from _utils import seed_everything
 
 
