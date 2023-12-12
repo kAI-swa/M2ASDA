@@ -59,8 +59,7 @@ if __name__ == "__main__":
         'verbose': args.verbose,
         'log_interval': args.log_interval,
         'random_state': args.random_state,
-        'weight': args.weight, 
-        "anomaly_celltype": args.anomaly_celltype
+        'weight': args.weight
     }
 
     model = Detect_SC(**parameters)
