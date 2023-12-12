@@ -24,7 +24,7 @@ def parse_args():
     parser.add_argument("--log_interval", type=int, default=100)
     parser.add_argument("--random_state", type=int, default=42)
     parser.add_argument("--weight", default=None)
-    parser.add_argument("--anomaly_celltype", type="str", help="given the anomaly cell type for training if you don't have anomaly datasets")
+    parser.add_argument("--anomaly_celltype", type=str, help="given the anomaly cell type for training if you don't have anomaly datasets")
 
     args = parser.parse_args()
 
