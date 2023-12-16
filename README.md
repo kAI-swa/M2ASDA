@@ -4,7 +4,7 @@
 
 
 ## Notice
-**This repo is forked from CatchXu(https://github.com/Catchxu/ACsleuth) and He is the main author**
+**Forked from CatchXu(https://github.com/Catchxu/ACsleuth)**
 
 ## Dependencies
 - torch==1.13.0
