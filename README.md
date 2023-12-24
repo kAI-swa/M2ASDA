@@ -36,6 +36,7 @@ Model/
 |-- Model.py      # 整个代码的运行入口
 |-- subtyping.py # Module Ⅳ, subtyping
 |-- LICENSE
+```
 
 ## Tested environment
 - **CPU: Intel(R) Xeon(R) Platinum 8255C CPU @ 2.50GHz**
