@@ -7,12 +7,12 @@ import warnings
 import numpy as np
 import pandas as pd
 import anndata as ad
-from typing import List, Union
+from typing import List, Union, Optional
 
 from .Net import Batch_G, Discriminator
-from align import align_obs
-from _pretrain import Pretrain_SC
-from _utils import seed_everything, calculate_gradient_penalty
+from .align import Align_SC
+from ._pretrain import Pretrain_SC
+from ._utils import seed_everything, calculate_gradient_penalty
 
 
 class Correct:
@@ -77,12 +77,32 @@ class Correct_SC(Correct):
         self.fast = fast
         self.include = include
 
-    def fit(self, input: Union[ad.AnnData, List], base: ad.AnnData):
+    def fit(self, input: Union[ad.AnnData, List], base: ad.AnnData, idx: Optional[pd.DataFrame] = None):
         if self.sample_rate < 1:
             input, base = self.sampleing(input, base)
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            input, new_base, label, batch_n = self.data_loader(input, base)
+        if idx is None:
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                input, new_base, label, batch_n = self.data_loader(input, base)
+        else:
+            if isinstance(input, List):
+                batch_n = len(input)
+                input_pair = []
+                base_pair = []
+                for i in range(batch_n):
+                    adata = input[i]
+                    adata.obs['batch_new'] = i
+                    adata_name = 'input%s_idx' % (i+1)
+                    input_pair.append(adata[idx[adata_name]])
+                    base_pair.append(base[idx['ref_idx']])
+                input = ad.concat(input_pair, merge='same')
+                new_base = ad.concat(base_pair, merge='same')
+                label = np.array(pd.get_dummies(input_pair.obs['batch_new']))
+            else:
+                batch_n = 1
+                input = input[idx['input_idx']]
+                new_base = base[idx['ref_idx']]
+                label = [1 for i in range(new_base.n_obs)]
 
         self.input = torch.Tensor(input.X).to(self.device)
         self.base = torch.Tensor(new_base.X).to(self.device)
@@ -95,6 +115,7 @@ class Correct_SC(Correct):
         self.G_scaler = torch.cuda.amp.GradScaler()
         self.L1 = nn.L1Loss().to(self.device)
         if self.pretrain:
+            self.train = input
             self.load_weight()
 
         if self.verbose:
@@ -102,7 +123,7 @@ class Correct_SC(Correct):
 
         self.D.train()
         self.G.train()
-        for epoch in range(self.n_epochs):
+        for epoch in tqdm(range(self.n_epochs)):
             self.Update_G()
             for i in range(self.n_critic):
                 self.Update_D()
@@ -117,8 +138,22 @@ class Correct_SC(Correct):
         return adata
 
     def data_loader(self, input, base):
-        idx = align_obs(input, base, fast=self.fast, verbose=self.verbose,
-                        random_state=self.random_state, mode='SC')
+        parameters = {
+            'n_epochs': 1000,
+            'learning_rate': 1e-3,
+            'pretrain': True,
+            'GPU': True,
+            'verbose': self.verbose,
+            'log_interval': 200,
+            'weight': None,
+            'random_state': self.random_state,
+            'fast': self.fast
+        }
+        align_obs = Align_SC(**parameters)
+        if isinstance(input, list):
+            idx = align_obs.fit_mult(input, base)
+        else:
+            idx = align_obs.fit(input, base)
         if isinstance(input, List):
             batch_n = len(input)
             input_pair = []
@@ -128,22 +163,22 @@ class Correct_SC(Correct):
                 adata.obs['batch_new'] = i
                 adata_name = 'input%s_idx' % (i+1)
                 input_pair.append(adata[idx[adata_name]])
-                base_pair.append(base[idx['base_idx']])
+                base_pair.append(base[idx['ref_idx']])
             input_pair = ad.concat(input_pair, merge='same')
             base_pair = ad.concat(base_pair, merge='same')
             label = np.array(pd.get_dummies(input_pair.obs['batch_new']))
         else:
             batch_n = 1
             input_pair = input[idx['input_idx']]
-            base_pair = base[idx['base_idx']]
+            base_pair = base[idx['ref_idx']]
             label = [1 for i in range(base_pair.n_obs)]
 
         return input_pair, base_pair, label, batch_n
 
     def load_weight(self):
-        path = './ODBCGAN/pretrain_weight/SCNetAE_Instance.pth'
+        path = './pretrain_weight/SCNetAE_Instance.pth'
         if not os.path.exists(path):
-            Pretrain_SC(self.train)
+            Pretrain_SC(self.train, norm_type="Instance")
 
         # load the pre-trained weights for Encoder and Decoder
         pre_weights = torch.load(path)
@@ -192,7 +227,7 @@ class Correct_SC(Correct):
             input.X = output
             output = input
             if self.include:
-                output = ad.concat([base, output], merge='same')
+                output = ad.concat([base, output], merge='same', label="batch")
             return output
 
     @torch.no_grad()

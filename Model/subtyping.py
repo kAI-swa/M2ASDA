@@ -1,8 +1,8 @@
 import torch
 from torch.nn import functional as F
 import numpy as np
-from Net import classifier_SC
-from _utils import seed_everything
+from .Net import classifier_SC
+from ._utils import seed_everything
 
 
 class Classify:
@@ -47,7 +47,7 @@ class Classify_SC(Classify):
 
         if self.pretrain:
             # load the pre-trained weights for encoder
-            pre_weights = torch.load('./ODBCGAN/pretrain_weight/SCNetAE_Batch.pth')
+            pre_weights = torch.load('./pretrain_weight/SCNetAE_Batch.pth')
             model.net.load_state_dict({k: v for k, v in pre_weights.items()})
             for name, value in model.net.named_parameters():
                 value.requires_grad = False

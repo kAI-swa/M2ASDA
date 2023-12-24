@@ -3,7 +3,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from ._unit import MemoryUnit
-from ._net import SCNetAE, StyleUnit
+from ._net import SCNetAE
+from ._unit import StyleUnit
 
 
 class Memory_G(nn.Module):

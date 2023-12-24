@@ -10,8 +10,8 @@ import anndata as ad
 from typing import Literal, Union, List
 from tqdm import tqdm
 
-from Net import SCNetAE
-from _utils import seed_everything
+from .Net import SCNetAE
+from ._utils import seed_everything
 
 
 def Pretrain_SC(train: ad.AnnData,

@@ -8,12 +8,12 @@ import numpy as np
 import pandas as pd
 import anndata as ad
 import scanpy as sc
-
-from Net import Memory_G, Discriminator
-from _pretrain import Pretrain_SC
-from _utils import seed_everything, calculate_gradient_penalty
 from typing import Union
 from tqdm import tqdm
+
+from .Net import Memory_G, Discriminator
+from ._pretrain import Pretrain_SC
+from ._utils import seed_everything, calculate_gradient_penalty
 
 
 class Detect:
@@ -75,16 +75,7 @@ class Detect_SC(Detect):
                          shrink_thres, temperature, n_critic, pretrain, GPU, verbose,
                          log_interval, random_state, weight)
 
-    def fit(self, train: Union[ad.AnnData, str]):
-        if isinstance(train, str):
-            if os.path.exists(train):
-                train = sc.read_h5ad(train)
-                train = train[train.obs["cell.type"] != "B cells"]
-            else:
-                raise FileNotFoundError("File not found Error")
-        else:
-            train = train
-
+    def fit(self, train: Union[ad.AnnData]):
         if self.verbose:
             print('Begin to learn information of normal cells with ODBC-GAN...')
 
@@ -166,7 +157,7 @@ class Detect_SC(Detect):
     def load_weight(self):
         path = './pretrain_weight/SCNetAE_Batch.pth'
         if not os.path.exists(path):
-            Pretrain_SC(self.train)
+            Pretrain_SC(self.train, norm_type="Batch")
 
         # load the pre-trained weights for Encoder and Decoder
         pre_weights = torch.load(path)

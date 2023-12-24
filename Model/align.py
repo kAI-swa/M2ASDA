@@ -6,9 +6,9 @@ import torch.nn.functional as F
 import numpy as np
 import pandas as pd
 import anndata as ad
-from Net import Align_G, Discriminator
-from _pretrain import Pretrain_SC
-from _utils import seed_everything, calculate_gradient_penalty
+from .Net import Align_G, Discriminator
+from ._pretrain import Pretrain_SC
+from ._utils import seed_everything, calculate_gradient_penalty
 
 
 class Align:
@@ -128,7 +128,7 @@ class Align_SC(Align):
         return m.detach().cpu().numpy()
 
     def load_weight(self, adata):
-        path = './ODBCGAN/pretrain_weight/SCNetAE_Batch.pth'
+        path = './pretrain_weight/SCNetAE_Batch.pth'
         if not os.path.exists(path):
             Pretrain_SC(adata)
 
