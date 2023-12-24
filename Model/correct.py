@@ -123,7 +123,7 @@ class Correct_SC(Correct):
 
         self.D.train()
         self.G.train()
-        for epoch in tqdm(range(self.n_epochs)):
+        for epoch in range(self.n_epochs):
             self.Update_G()
             for i in range(self.n_critic):
                 self.Update_D()

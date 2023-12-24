@@ -75,7 +75,7 @@ class Detect_SC(Detect):
                          shrink_thres, temperature, n_critic, pretrain, GPU, verbose,
                          log_interval, random_state, weight)
 
-    def fit(self, train: Union[ad.AnnData]):
+    def fit(self, train: ad.AnnData):
         if self.verbose:
             print('Begin to learn information of normal cells with ODBC-GAN...')
 
