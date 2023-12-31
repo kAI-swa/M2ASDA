@@ -1,4 +1,5 @@
 import os
+import anndata2ri
 import pandas as pd
 import scanpy as sc
 import anndata as ad
@@ -47,6 +48,7 @@ def monocle_v3(train: ad.AnnData, random_state: int, save_dir: Optional[str] = N
     importr("Matrix")
     importr("Seurat")
     globalenv['seed'] = random_state
+    globalenv['train'] = anndata2ri.py2rpy(train)
     globalenv['save_seurat'] = save_seurat
     globalenv['save_dir'] = save_dir
     globalenv['counts_dir'] = os.path.join(save_dir + "/counts.mtx")
@@ -57,22 +59,23 @@ def monocle_v3(train: ad.AnnData, random_state: int, save_dir: Optional[str] = N
     r("""
     set.seed(seed)
     ## load the data from disk into R environment
-    counts <- ReadMtx(mtx=counts_dir, cells=barcode_dir, features=genemeta_dir, feature.column=1)
+    counts <- assay(train,'X')
     cell_metadata = read.csv(cellmeta_dir)
     gene_metadata = read.csv(genemeta_dir)
     
-    rownames(counts) <- cell_metadata$Barcode
-    colnames(counts) <- gene_metadata$gene
+    colnames(counts) <- cell_metadata$Barcode
+    rownames(counts) <- gene_metadata$gene
     
-    seurat <- CreateSeuratObject(counts = t(counts))
+    seurat <- CreateSeuratObject(counts=counts)
     ## Set the meta data
     seurat@meta.data <- cbind(cell_metadata, seurat@meta.data)
     rownames(seurat@meta.data) <- colnames(seurat)
-    seurat <- AddMetaData(object = seurat, metadata = gene_metadata, key = "gene")
     
     ## Reset the UMAP embeddings with previous runned umap embeddings
-    seurat <- RunPCA(seurat, features = VariableFeatures(object = seurat))
-    seurat <- RunUMAP(seurat, dims = 1:30)
+    seurat <- FindVariableFeatures(seurat, selection.method = "vst", nfeatures = 2000)
+    seurat <- ScaleData(seurat)
+    seurat <- RunPCA(seurat, features = VariableFeatures(object = seurat), npcs=30, verbose=False)
+    seurat <- RunUMAP(seurat, dims = 1:10)
     runned_umap <- seurat@meta.data[, c('UMAP1', 'UMAP2')]
     colnames(runned_umap) <- c('UMAP_1', 'UMAP_2')
     seurat@reductions$umap@cell.embeddings <- as.matrix(runned_umap)
@@ -103,3 +106,4 @@ def monocle_v3(train: ad.AnnData, random_state: int, save_dir: Optional[str] = N
                label_leaves=FALSE,
                label_branch_points=FALSE)
     """)
+    
