@@ -58,6 +58,7 @@ def monocle_v3(train: ad.AnnData, random_state: int, save_dir: Optional[str] = N
 
     r("""
     set.seed(seed)
+    options(warn=-1)
     ## load the data from disk into R environment
     counts <- assay(train,'X')
     cell_metadata = read.csv(cellmeta_dir)
@@ -74,14 +75,14 @@ def monocle_v3(train: ad.AnnData, random_state: int, save_dir: Optional[str] = N
     ## Reset the UMAP embeddings with previous runned umap embeddings
     seurat <- FindVariableFeatures(seurat, selection.method = "vst", nfeatures = 2000)
     seurat <- ScaleData(seurat)
-    seurat <- RunPCA(seurat, features = VariableFeatures(object = seurat), npcs=30, verbose=False)
+    seurat <- RunPCA(seurat, features = VariableFeatures(object = seurat), npcs=30, verbose=FALSE)
     seurat <- RunUMAP(seurat, dims = 1:10)
     runned_umap <- seurat@meta.data[, c('UMAP1', 'UMAP2')]
     colnames(runned_umap) <- c('UMAP_1', 'UMAP_2')
     seurat@reductions$umap@cell.embeddings <- as.matrix(runned_umap)
     
     ## if want to save the seurat object into disks
-    if (save_seurat == True) {
+    if (save_seurat == TRUE) {
         saveRDS(seurat, file.path(save_dir,'seo_annotated.rds'))
     }
     
@@ -92,18 +93,36 @@ def monocle_v3(train: ad.AnnData, random_state: int, save_dir: Optional[str] = N
     row.names = rownames(seurat@reductions$pca@feature.loadings))
     colnames(gene_annotation) <- "gene_short_name"
     
-    ### gene expression matrix
-    expression_matrix <- GetAssayData(object = seurat)
+    ### cell_metadata
+    cell_metadata <- as.data.frame(seurat@assays[["RNA"]]@counts@Dimnames[[2]], row.names = seurat@assays[["RNA"]]@counts@Dimnames[[2]])
+    colnames(cell_metadata) <- "barcode"
+    
+    ### expression matrix
+    New_matrix <- seurat@assays[["RNA"]]@counts
+    New_matrix <- New_matrix[rownames(seurat@reductions[["pca"]]@feature.loadings), ]
+    expression_matrix <- New_matrix
     
     cds <- new_cell_data_set(expression_matrix, \
     cell_metadata = cell_metadata, gene_metadata = gene_annotation)
-    cds@reducedDims@listData[["UMAP"]] <-seurat@reductions[["umap"]]@cell.embeddings
+    
+    cds <- preprocess_cds(cds, num_dim = 50)
+    cds <- reduce_dimension(cds, reduction_method="UMAP")
+    
+    recreate.partition <- c(rep(1, length(cds@colData@rownames)))
+    names(recreate.partition) <- cds@colData@rownames
+    recreate.partition <- as.factor(recreate.partition)
 
+    cds@clusters@listData[["UMAP"]][["partitions"]] <- recreate.partition
+    cds@int_colData@listData[["reducedDims"]][["UMAP"]] <-seurat@reductions[["umap"]]@cell.embeddings
+    
+    cds <- cluster_cells(cds, cluster_method="louvain")
     cds <- learn_graph(cds)
+    cds <- order_cells(cds, reduction_method = "UMAP")
     plot_cells(cds,
-               color_cells_by = "cell.type",
-               label_groups_by_cluster=FALSE,
+               color_cells_by = "pseudotime",
+               label_cell_groups=FALSE,
                label_leaves=FALSE,
-               label_branch_points=FALSE)
+               label_branch_points=FALSE,
+               graph_label_size=1.5)
     """)
     
