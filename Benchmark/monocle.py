@@ -59,6 +59,7 @@ def monocle_v3(train: ad.AnnData, random_state: int, save_dir: Optional[str] = N
     r("""
     set.seed(seed)
     options(warn=-1)
+    options(browser = "firefox")
     ## load the data from disk into R environment
     counts <- assay(train,'X')
     cell_metadata = read.csv(cellmeta_dir)
@@ -117,7 +118,9 @@ def monocle_v3(train: ad.AnnData, random_state: int, save_dir: Optional[str] = N
     
     cds <- cluster_cells(cds, cluster_method="louvain")
     cds <- learn_graph(cds)
+    plot_cells(cds, color_cells_by = "partition")
     cds <- order_cells(cds, reduction_method = "UMAP")
+    
     plot_cells(cds,
                color_cells_by = "pseudotime",
                label_cell_groups=FALSE,
