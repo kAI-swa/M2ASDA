@@ -12,7 +12,10 @@ from typing import Optional
 
 def monocle_v3(train: ad.AnnData, random_state: int, save_dir: Optional[str] = None, save_seurat: bool = False):
     if not save_dir:
-        os.mkdir("./temp")
+        if os.path.exists("./temp"):
+            print("Save into current temp file")
+        else:
+            os.mkdir("./temp")
         save_dir = "./temp"
     else:
         if not os.path.exists(save_dir):
