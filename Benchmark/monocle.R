@@ -53,13 +53,24 @@ monocle_v3 <- function(seed, train, cellmeta_dir, genemeta_dir, save_seurat, sav
 
     cds <- cluster_cells(cds, cluster_method="louvain")
     cds <- learn_graph(cds)
-    plot_cells(cds, color_cells_by = "partition")
+    monocle3::plot_cells(cds, color_cells_by = "partition")
     cds <- order_cells(cds, reduction_method = "UMAP")
 
-    plot_cells(cds,
+    monocle3::plot_cells(cds,
                 color_cells_by = "pseudotime",
                 label_cell_groups=FALSE,
                 label_leaves=FALSE,
                 label_branch_points=FALSE,
                 graph_label_size=1.5)
 }
+
+save_dir <- "/volume1/home/kliu/Data/temp"
+train <- readRDS(paste(save_dir, "/saved_data.rds", sep=""))
+seed = 42
+save_seurat <- TRUE
+counts_dir <- paste(save_dir, "/counts.mtx", sep="")
+barcode_dir <- paste(save_dir, "/barcode.csv", sep="")
+cellmeta_dir <- paste(save_dir, "/cell_metadata.csv", sep="")
+genemeta_dir <- paste(save_dir, "/gene_metadata.csv", sep="")
+
+monocle_v3(seed, train, cellmeta_dir, genemeta_dir, save_seurat, save_dir, counts_dir, barcode_dir)
