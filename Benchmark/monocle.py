@@ -52,6 +52,7 @@ def monocle_v3(train: ad.AnnData, random_state: int, save_dir: Optional[str] = N
     importr("Seurat")
     globalenv['seed'] = random_state
     globalenv['train'] = anndata2ri.py2rpy(train)
+    r.saveRDS(anndata2ri.py2rpy(train), file= save_dir + "/sce_data.rds")
     globalenv['save_seurat'] = save_seurat
     globalenv['save_dir'] = save_dir
     globalenv['counts_dir'] = os.path.join(save_dir + "/counts.mtx")
