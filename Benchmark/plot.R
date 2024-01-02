@@ -1,6 +1,8 @@
 library(monocle3)
 library(Matrix)
 library(Seurat)
+library(ggplot2)
+library(ggrepel)
 
 save_dir <- "/volume1/home/kliu/Data/temp"
 train <- readRDS(paste(save_dir, "/sce_data.rds", sep=""))
@@ -42,6 +44,8 @@ colnames(gene_annotation) <- "gene_short_name"
 ### cell_metadata
 cell_metadata <- as.data.frame(seurat@assays[["RNA"]]@counts@Dimnames[[2]], row.names = seurat@assays[["RNA"]]@counts@Dimnames[[2]])
 colnames(cell_metadata) <- "barcode"
+cell_types <- seurat@meta.data$cell.type
+cell_metadata$cell.type <- cell_types
 
 ### expression matrix
 New_matrix <- seurat@assays[["RNA"]]@counts
@@ -63,19 +67,27 @@ cds@int_colData@listData[["reducedDims"]][["UMAP"]] <-seurat@reductions[["umap"]
 cds <- cluster_cells(cds, cluster_method="louvain")
 cds <- learn_graph(cds)
 
-png(file = "cluster.png", width = 800, height = 600, res = 300)
-plot_cells(cds, color_cells_by = "partition")
+png(file = "cluster.png", width = 800, height = 800, res = 300)
+p <- plot_cells(cds, color_cells_by = "cell.type", graph_label_size=0.5)
+p + theme(
+  legend.position = "top",
+  legend.box = "horizontal",  # Use "horizontal" for a horizontal legend
+  legend.key.size = unit(0.5, "cm")  # Adjust the size as needed
+)
 dev.off()
 
 cds <- order_cells(cds, reduction_method = "UMAP")
 
-png(file = "pseudotime.png", width = 800, height = 600, res = 300)
-plot_cells(cds,
+png(file = "pseudotime.png", width = 800, height = 800, res = 300)
+p <- plot_cells(cds,
            color_cells_by = "pseudotime",
            label_cell_groups=FALSE,
            label_leaves=FALSE,
            label_branch_points=FALSE,
-           graph_label_size=1.5)
+           graph_label_size=0.5)
+p + theme(
+  legend.position = "top",
+  legend.box = "horizontal",  # Use "horizontal" for a horizontal legend
+  legend.key.size = unit(0.5, "cm")  # Adjust the size as needed
+)
 dev.off()
-
-
