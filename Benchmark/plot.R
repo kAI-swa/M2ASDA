@@ -4,6 +4,9 @@ library(Seurat)
 library(ggplot2)
 library(ggrepel)
 
+# ---------------------------------Monocle3------------------------------------#
+
+# Construct cell data set object(cds) for monocle3
 save_dir <- "/volume1/home/kliu/Data/temp"
 train <- readRDS(paste(save_dir, "/sce_data.rds", sep=""))
 seed = 42
@@ -62,23 +65,32 @@ names(recreate.partition) <- cds@colData@rownames
 recreate.partition <- as.factor(recreate.partition)
 
 cds@clusters@listData[["UMAP"]][["partitions"]] <- recreate.partition
-cds@int_colData@listData[["reducedDims"]][["UMAP"]] <-seurat@reductions[["umap"]]@cell.embeddings
+cds@int_colData@listData[["reducedDims"]][["UMAP"]] <-seurat@reductions$umap@cell.embeddings
 
+# ----------------------------Finish Construct CDS-----------------------------#
+
+# --------------------------------Cluster plot---------------------------------#
 cds <- cluster_cells(cds, cluster_method="louvain")
 cds <- learn_graph(cds)
 
-png(file = "cluster.png", width = 800, height = 800, res = 300)
-p <- plot_cells(cds, color_cells_by = "cell.type", graph_label_size=0.5)
+png(file = "cluster_combat.png", width = 800, height = 800, res = 300)
+p <- plot_cells(cds, 
+                color_cells_by = "cell.type",
+                label_cell_groups=FALSE,
+                label_leaves=FALSE,
+                label_branch_points=FALSE,
+                graph_label_size=0.5) +
+  geom_text_repel(aes(label = cell.type), size = 2, max.overlaps = 10)
 p + theme(
   legend.position = "top",
   legend.box = "horizontal",  # Use "horizontal" for a horizontal legend
-  legend.key.size = unit(0.5, "cm")  # Adjust the size as needed
+  legend.key.size = unit(0.1, "cm")  # Adjust the size as needed
 )
 dev.off()
 
+# -----------------------------Pseudo time plot--------------------------------#
 cds <- order_cells(cds, reduction_method = "UMAP")
-
-png(file = "pseudotime.png", width = 800, height = 800, res = 300)
+png(file = "pseudotime_combat.png", width = 800, height = 800, res = 300)
 p <- plot_cells(cds,
            color_cells_by = "pseudotime",
            label_cell_groups=FALSE,
@@ -90,4 +102,14 @@ p + theme(
   legend.box = "horizontal",  # Use "horizontal" for a horizontal legend
   legend.key.size = unit(0.5, "cm")  # Adjust the size as needed
 )
+dev.off()
+
+# ----------------------Pseudo time-Density Bar plot---------------------------#
+png(file = "pseudotime_density_combat.png", width = 800, height = 800, res = 300)
+traj_coord <- pseudotime(cds, reduction_method = "UMAP")
+plot_data <- data.frame(Pseudotime = traj_coord)
+pseudotime_plot <- ggplot(plot_data, aes(x = Pseudotime)) +
+  geom_density(fill = "skyblue", alpha = 0.7) +
+  labs(title = "Pseudotime Density Plot", x = "Pseudotime", y = "Density")
+print(pseudotime_plot)
 dev.off()
