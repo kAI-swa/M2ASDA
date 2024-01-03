@@ -167,7 +167,7 @@ class Correct_SC(Correct):
                 adata_name = 'input%s_idx' % (i+1)
                 input_pair.append(adata[idx[adata_name]])
                 base_pair.append(base[idx['ref_idx']])
-            input_pair = ad.concat(input_pair, merge='same')
+            input_pair = ad.concat(input_pair, merge='same', label="batch")
             base_pair = ad.concat(base_pair, merge='same')
             label = np.array(pd.get_dummies(input_pair.obs['batch_new']))
         else:
@@ -230,7 +230,7 @@ class Correct_SC(Correct):
             input.X = output
             output = input
             if self.include:
-                num_batch = len(input.obs["batch"].unique())
+                num_batch = len(output.obs["batch"].unique())
                 input_list = []
                 for i in range(num_batch):
                     input_list.append(output[output.obs["batch"] == f"{i}"])
@@ -259,5 +259,9 @@ class Correct_SC(Correct):
             input.X = output
             output = input
             if self.include:
-                output = ad.concat([base, output], merge='same')
+                num_batch = len(input.obs["batch"].unique())
+                input_list = []
+                for i in range(num_batch):
+                    input_list.append(output[output.obs["batch"] == f"{i}"])
+                output = ad.concat([base, *input_list], merge='same', label="batch")
             return output
