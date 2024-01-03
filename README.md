@@ -19,7 +19,7 @@
 ## Architecture
 ```lua
 Model/
-|-- Net/ #模型结构
+|-- Net/
 |   |-- __init__.py/
 |   |-- _net.py
 |   |-- _unit.py
