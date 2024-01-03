@@ -21,20 +21,20 @@
 Model/
 |-- Net/ #模型结构
 |   |-- __init__.py/
-|   |-- _net.py   # SCNetAE model
-|   |-- _unit.py   # memory_unit, style_unit
-|   |--classifier.py   # moduleⅣ subtyping的模型
-|   |--discriminator.py   # 判别器
-|   |--generator.py   # scNetAE + memory_unit =  Memory_G...以此类推， (不管是哪个module, 基本上可以理解为以scNetAE model为基础，加上memory_unit, style_unit)
+|   |-- _net.py
+|   |-- _unit.py
+|   |--classifier.py
+|   |--discriminator.py
+|   |--generator.py
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 |-- __init__.py
-|--  _pretrain.py   #预训练
-|-- _utils.py        # 一些helpful function
-|-- align.py         # ModuleⅡ, align pairs的训练过程, Align_G找pair
-|-- correct.py     # ModuleⅢ, 找到pair之后，用Batch_G去除批次效应
-|-- detect.py      # Module Ⅰ，anomaly detection
-|-- Model.py      # 整个代码的运行入口
-|-- subtyping.py # Module Ⅳ, subtyping
+|--  _pretrain.py
+|-- _utils.py
+|-- align.py
+|-- correct.py
+|-- detect.py
+|-- Model.py
+|-- subtyping.py
 |-- LICENSE
 ```
 
