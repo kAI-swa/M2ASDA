@@ -78,6 +78,7 @@ class Correct_SC(Correct):
         self.include = include
 
     def fit(self, input: Union[ad.AnnData, List], base: ad.AnnData, idx: Optional[pd.DataFrame] = None):
+        base.obs_names_make_unique()
         if self.sample_rate < 1:
             input, base = self.sampleing(input, base)
         if idx is None:
@@ -91,11 +92,12 @@ class Correct_SC(Correct):
                 base_pair = []
                 for i in range(batch_n):
                     adata = input[i]
+                    adata.obs_names_make_unique()
                     adata.obs['batch_new'] = i
                     adata_name = 'input%s_idx' % (i+1)
                     input_pair.append(adata[idx[adata_name]])
                     base_pair.append(base[idx['ref_idx']])
-                input = ad.concat(input_pair, merge='same')
+                input = ad.concat(input_pair, merge='same', label="batch")
                 new_base = ad.concat(base_pair, merge='same')
                 label = np.array(pd.get_dummies(input_pair.obs['batch_new']))
             else:
@@ -160,6 +162,7 @@ class Correct_SC(Correct):
             base_pair = []
             for i in range(batch_n):
                 adata = input[i]
+                adata.obs_names_make_unique()
                 adata.obs['batch_new'] = i
                 adata_name = 'input%s_idx' % (i+1)
                 input_pair.append(adata[idx[adata_name]])
@@ -227,7 +230,11 @@ class Correct_SC(Correct):
             input.X = output
             output = input
             if self.include:
-                output = ad.concat([base, output], merge='same', label="batch")
+                num_batch = len(input.obs["batch"].unique())
+                input_list = []
+                for i in range(num_batch):
+                    input_list.append(output[output.obs["batch"] == f"{i}"])
+                output = ad.concat([base, *input_list], merge='same', label="batch")
             return output
 
     @torch.no_grad()
