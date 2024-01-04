@@ -1,10 +1,4 @@
-# scRNA-AnomalyDetection
-**Anomaly Detection for scRNA-seq Data through GAN-based Model**
-![image](https://github.com/Kainan-Liu/scRNA-AnomalyDetection/assets/146005327/523a3b3c-d2c0-4982-8be3-160b9effc05e)
-
-
-## Notice
-**Forked from CatchXu(https://github.com/Catchxu/ACsleuth)**
+![pseudotime_density_Model](https://github.com/Kainan-Liu/scanba/assets/146005327/52e32b73-8467-48c2-9e26-4213164b5b54)
 
 ## Dependencies
 - torch==1.13.0
