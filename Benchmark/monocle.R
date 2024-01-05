@@ -7,15 +7,6 @@ monocle_v3 <- function(seed, train, cellmeta_dir, genemeta_dir, save_seurat, sav
     counts <- assay(train,'X')
     cell_metadata = read.csv(cellmeta_dir, encoding='utf-8')
     gene_metadata = read.csv(genemeta_dir, encoding='utf-8')
-library(monocle3)
-library(Matrix)
-library(Seurat)
-
-monocle_v3 <- function(seed, train, cellmeta_dir, genemeta_dir, save_seurat, save_dir, counts_dir, barcode_dir) {
-    set.seed(seed)
-    counts <- assay(train,'X')
-    cell_metadata = read.csv(cellmeta_dir, encoding='utf-8')
-    gene_metadata = read.csv(genemeta_dir, encoding='utf-8')
 
     colnames(counts) <- cell_metadata[["Barcode"]]
     rownames(counts) <- gene_metadata[["gene"]]
