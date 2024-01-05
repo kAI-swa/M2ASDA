@@ -146,6 +146,7 @@ class Detect_SC(Detect):
         real_z, fake_x, fake_z = self.G(self.test)
         self.z_x = real_z
         self.res_x = self.test - fake_x
+        self.fake_x = fake_x
         diff = 1 - F.cosine_similarity(real_z, fake_z).reshape(-1, 1)
         diff = diff.cpu().numpy()
         result = pd.DataFrame({'cell_idx': test.obs_names, 'score': diff.reshape(-1)})
