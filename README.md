@@ -1,4 +1,4 @@
-![pseudotime_density_Model](https://github.com/Kainan-Liu/scanba/assets/146005327/52e32b73-8467-48c2-9e26-4213164b5b54)
+![framework](https://github.com/Kainan-Liu/scanba/assets/146005327/f00271b3-276a-45ea-9897-d341fae74124)
 
 ## Dependencies
 - torch==1.13.0
