@@ -1,18 +1,6 @@
-![framework](https://github.com/Kainan-Liu/scanba/assets/146005327/f00271b3-276a-45ea-9897-d341fae74124)
-
-## Dependencies
-- torch==1.13.0
-- torchvision==0.14.1
-- anndata==0.10.3
-- numpy==1.19.2
-- scanpy==1.9.6
-- scipy==1.9.3
-- pandas==1.5.2
-- setuptools==59.5.0
-
 ## Architecture
 ```lua
-Model/
+gsasd/
 |-- Net/
 |   |-- __init__.py/
 |   |-- _net.py
